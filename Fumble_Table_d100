@@ -1,0 +1,77 @@
+// By:		Threedub
+// Base Script Stolen from		
+// 		By:       Jefe
+// 		Contact:  https://app.roll20.net/users/451842/jefe
+var FumbleTable = FumbleTable || (function() {
+    'use strict';
+
+    var version = 0.1,
+        rangeMax = 100,
+        apiCommand = "!fumble",
+        speakingAs = "Fumble Table",
+        sendMsgTo = " ",
+        msgFormat = sendMsgTo + "(!roll) - !result",
+        table = [
+            {range: [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19], result: "You miss and look bad doing it!"},
+            {range: [20,21,22,23,24,25,26,27,28,29,30], result: "You DROP your weapon."},
+            {range: [31,32,33,34,35,36,37,38,39,40], result: "You stumble, falling PRONE!"},
+            {range: [41,42,43,44,45,46,47,48,49,50], result: "You pulled your groin!  Speed reduced by HALF for rest of the encounter."},
+            {range: [51,52,53,54,55], result: "Mighty swing!  You throw your weapon 10' in a random direction."},
+			{range: [56,57,58,59,60], result: "You miss so badly you leave yourself wide open.  Next attack made against you with ADVANTAGE."},
+			{range: [61,62,63,64,65], result: "You have trouble regaining your balance.  Next attack made with DISADVANTAGE."},	
+			{range: [66,67,68,69,70], result: "You have a panic attack and are FRIGHTENED until you make a WIS SAVE vs. DC12."},				
+            {range: [71,72,73,74,75,76,77,78,79,80], result: "You manage to injure yourself.   Roll normal damage."},
+            {range: [81,82,83,84,85,86,87,88,89,90], result: "You miss so wildly your dislocate your arm.  You are stunned for 1 round while you snap it back in."},
+            {range: [91,92,93,94,95], result: "Sweat gets into your eyes, you are BLINDED until the start of your next turn."},
+            {range: [96,97,98,99], result: "You missed your target but hit an ally within range.  Roll normal damage."},
+            {range: [100], result: "You somehow manage to hit yourself for MAX Damage" }
+
+        ],
+
+
+    
+    checkInstall = function() {
+        log('FumbleTable v'+version+' Ready');
+	},
+    
+
+    writeResult = function(msg, rollResult) {
+        sendChat(speakingAs, msgFormat.replace('!roll', rollResult.roll).replace('!result', rollResult.result));
+    },
+
+    rollOnTable = function() {
+        var roll = randomInteger(rangeMax);
+        var checkRange = function(entry){ return entry.range.indexOf(roll) !== -1 };
+        var tableEntry = _.find(table, checkRange);
+        return {
+            roll: roll,
+            result: tableEntry.result
+        };
+    },
+
+    handleInput = function(msg) {
+        var args;
+        if(msg.type !== "api") {
+            return;
+        }
+        args = msg.content.split(/\s+/);
+        switch(args[0]) {
+            case apiCommand:
+                writeResult(msg, rollOnTable());
+        }
+    },
+
+    init = function() {
+        checkInstall();
+        on("chat:message", handleInput);
+    };
+
+    return {
+		init: init
+	};
+}());
+
+on('ready', function() {
+    'use strict';
+    FumbleTable.init();
+});
